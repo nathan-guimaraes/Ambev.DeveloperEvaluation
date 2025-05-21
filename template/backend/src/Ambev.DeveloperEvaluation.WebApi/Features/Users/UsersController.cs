@@ -8,6 +8,8 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteUser;
 using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
 using Ambev.DeveloperEvaluation.Application.Users.GetUser;
 using Ambev.DeveloperEvaluation.Application.Users.DeleteUser;
+using Ambev.DeveloperEvaluation.WebApi.Features.Users.ListUsers;
+using Ambev.DeveloperEvaluation.Application.Users.ListUsers;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 
@@ -20,16 +22,18 @@ public class UsersController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly ILogger<UsersController> _logger;
 
     /// <summary>
     /// Initializes a new instance of UsersController
     /// </summary>
     /// <param name="mediator">The mediator instance</param>
     /// <param name="mapper">The AutoMapper instance</param>
-    public UsersController(IMediator mediator, IMapper mapper)
+    public UsersController(IMediator mediator, IMapper mapper, ILogger<UsersController> logger)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -117,5 +121,35 @@ public class UsersController : BaseController
             Success = true,
             Message = "User deleted successfully"
         });
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(PaginatedResponse<ListUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetProductsAsync([FromQuery] ListUserRequest request, CancellationToken
+    cancellationToken)
+    {
+        _logger.LogInformation("Controller {UsersController} triggered to handle {GetProductsRequest}",
+            nameof(UsersController));
+
+        //var validator = new GetAllProductsRequestValidator();
+        //var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        //if (!validationResult.IsValid)
+        //{
+        //    _logger.LogWarning("Validation failed for {GetProductsRequest}", nameof(GetAllProductsRequest));
+        //    return base.BadRequest(validationResult.Errors);
+        //}
+
+        var command = _mapper.Map<ListUserCommand>(request);
+        var response = await _mediator.Send(command, cancellationToken);
+        var users = _mapper.Map<List<ListUserResponse>>(response.Users.Data);
+        var pagedList = new PaginatedList<ListUserResponse>(
+            users,
+            response.Users.TotalItems,
+            response.Users.CurrentPage,
+            response.Users.PageSize);
+
+        return OkPaginated(pagedList);
     }
 }

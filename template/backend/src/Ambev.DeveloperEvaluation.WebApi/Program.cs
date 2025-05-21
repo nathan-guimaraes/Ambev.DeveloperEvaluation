@@ -69,6 +69,7 @@ public class Program
             app.UseBasicHealthChecks();
 
             app.MapControllers();
+            app.ApplyMigrations();
 
             app.Run();
         }
@@ -80,5 +81,15 @@ public class Program
         {
             Log.CloseAndFlush();
         }
+    }
+}
+
+public static class MigrationResolver
+{
+    public static void ApplyMigrations(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DefaultContext>();
+        dbContext.Database.Migrate();
     }
 }

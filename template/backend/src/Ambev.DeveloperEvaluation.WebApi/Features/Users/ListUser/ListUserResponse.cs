@@ -1,12 +1,12 @@
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.ListUsers;
 
 /// <summary>
 /// API response model for GetUser operation
 /// </summary>
-public class GetUserResponse
+public class ListUserResponse
 {
     /// <summary>
     /// The unique identifier of the user
@@ -14,14 +14,14 @@ public class GetUserResponse
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The user's full name
-    /// </summary>
-    public FullName Name => new(Username);
-
-    /// <summary>
     /// The user's name
     /// </summary>
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The user's full name
+    /// </summary>
+    public FullName Name => new(Username);
 
     /// <summary>
     /// The user's email address
