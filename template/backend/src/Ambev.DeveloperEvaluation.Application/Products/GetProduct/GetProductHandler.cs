@@ -1,7 +1,9 @@
-using AutoMapper;
-using MediatR;
-using FluentValidation;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Services;
+using AutoMapper;
+using FluentValidation;
+using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.GetProduct;
 
@@ -10,21 +12,24 @@ namespace Ambev.DeveloperEvaluation.Application.Products.GetProduct;
 /// </summary>
 public class GetProductHandler : IRequestHandler<GetProductCommand, GetProductResult>
 {
-    private readonly IProductRepository _userRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
+    private readonly IProductCacheService<Product> _cacheService;
 
     /// <summary>
     /// Initializes a new instance of GetProductHandler
     /// </summary>
-    /// <param name="userRepository">The user repository</param>
+    /// <param name="productRepository">The product repository</param>
     /// <param name="mapper">The AutoMapper instance</param>
     /// <param name="validator">The validator for GetProductCommand</param>
     public GetProductHandler(
-        IProductRepository userRepository,
-        IMapper mapper)
+        IProductRepository productRepository,
+        IMapper mapper,
+        IProductCacheService<Product> cacheService)
     {
-        _userRepository = userRepository;
+        _productRepository = productRepository;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     /// <summary>
@@ -32,7 +37,7 @@ public class GetProductHandler : IRequestHandler<GetProductCommand, GetProductRe
     /// </summary>
     /// <param name="request">The GetProduct command</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The user details if found</returns>
+    /// <returns>The product details if found</returns>
     public async Task<GetProductResult> Handle(GetProductCommand request, CancellationToken cancellationToken)
     {
         var validator = new GetProductValidator();
@@ -41,10 +46,16 @@ public class GetProductHandler : IRequestHandler<GetProductCommand, GetProductRe
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (user == null)
-            throw new KeyNotFoundException($"Product with ID {request.Id} not found");
+        var cached = await _cacheService.GetCacheAsync(request.Id, cancellationToken);
 
-        return _mapper.Map<GetProductResult>(user);
+        if (cached is not null)
+            return _mapper.Map<GetProductResult>(cached);
+
+        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Product with ID {request.Id} not found");
+
+        await _cacheService.SetCacheAsync(product, cancellationToken);
+
+        return _mapper.Map<GetProductResult>(product);
     }
 }

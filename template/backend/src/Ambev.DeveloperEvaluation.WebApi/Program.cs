@@ -5,6 +5,7 @@ using Ambev.DeveloperEvaluation.Common.Security;
 using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.IoC;
 using Ambev.DeveloperEvaluation.ORM;
+using Ambev.DeveloperEvaluation.WebApi.Filters;
 using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,11 @@ public class Program
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             builder.AddDefaultLogging();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(o =>
+            {
+                o.Filters.Add<LogActionExecutionFilter>();
+            });
+
             builder.Services.AddEndpointsApiExplorer();
 
             builder.AddBasicHealthChecks();
@@ -35,6 +40,15 @@ public class Program
                     b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
                 )
             );
+
+            string redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+            });
+
+            builder.Services.AddDistributedMemoryCache();
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
 

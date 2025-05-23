@@ -3,7 +3,6 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.ORM.Extensions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
 
@@ -82,7 +81,7 @@ public class UserRepository : IUserRepository
             .Users
             .AsNoTracking()
             .Sort(pagedOrdered._order)
-            .Paginate(pagedOrdered);
+            .Paginate(pagedOrdered, cancellationToken);
 
         return query;
     }

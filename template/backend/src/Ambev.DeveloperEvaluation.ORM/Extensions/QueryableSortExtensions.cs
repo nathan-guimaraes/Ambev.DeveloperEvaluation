@@ -12,7 +12,8 @@ public static class QueryableSortExtensions
 
     public static async Task<PaginatedResult<T>> Paginate<T>(
         this IQueryable<T> queryable,
-        IPagedBase pagedBase)
+        IPagedBase pagedBase, 
+        CancellationToken cancellationToken)
     {
         var pageSize = pagedBase._size < 0 ? 0 : pagedBase._size;
         var currentPage = pagedBase._page < 0 ? 0 : pagedBase._page;
@@ -24,7 +25,7 @@ public static class QueryableSortExtensions
         var results = await queryable
             .Skip(skip)
             .Take(take)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return new PaginatedResult<T>
         {

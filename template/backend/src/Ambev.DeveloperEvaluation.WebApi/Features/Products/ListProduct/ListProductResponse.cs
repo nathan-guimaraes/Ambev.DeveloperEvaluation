@@ -1,12 +1,13 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProducts;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProduct;
 
 /// <summary>
 /// API response model for GetProduct operation
 /// </summary>
 public class ListProductResponse
 {
+    public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string Description { get; set; } = string.Empty;

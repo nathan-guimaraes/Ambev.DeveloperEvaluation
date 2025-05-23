@@ -1,4 +1,3 @@
-using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
@@ -36,10 +35,10 @@ public class GetUserResponse
     /// <summary>
     /// The user's role in the system
     /// </summary>
-    public UserRole Role { get; set; }
+    public string Role { get; set; }
 
     /// <summary>
     /// The current status of the user
     /// </summary>
-    public UserStatus Status { get; set; }
+    public string Status { get; set; }
 }

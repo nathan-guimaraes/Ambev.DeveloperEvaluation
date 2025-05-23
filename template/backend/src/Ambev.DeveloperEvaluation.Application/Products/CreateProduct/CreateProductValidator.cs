@@ -23,9 +23,10 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
     /// </remarks>
     public CreateProductCommandValidator()
     {
-        RuleFor(product => product.Email).SetValidator(new EmailValidator());
-        RuleFor(product => product.Productname).NotEmpty().Length(3, 50);
-        RuleFor(product => product.Password).SetValidator(new PasswordValidator());
-        RuleFor(product => product.Phone).Matches(@"^\+?[1-9]\d{1,14}$");
+        RuleFor(product => product.Title).NotEmpty().Length(3, 100);
+        RuleFor(product => product.Price).NotEmpty().GreaterThan(0);
+        RuleFor(product => product.Description).NotEmpty().Length(3, 500);
+        RuleFor(product => product.Category).NotEmpty().Length(3, 50);
+        RuleFor(product => product.Image).NotEmpty().Length(3, 300);
     }
 }

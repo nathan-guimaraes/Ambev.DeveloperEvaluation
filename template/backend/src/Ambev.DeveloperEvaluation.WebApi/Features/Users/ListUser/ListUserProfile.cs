@@ -11,6 +11,9 @@ public class ListUserProfile : Profile
     {
         CreateMap<ListUserRequest, ListUserCommand>();
         CreateMap<ListUserResult, ListUserResponse>();
-        CreateMap<GetUserResult, ListUserResponse>();
+        CreateMap<GetUserResult, ListUserResponse>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
+            .ReverseMap();
     }
 }

@@ -14,7 +14,6 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Create
 {
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
-    private readonly IPasswordHasher _passwordHasher;
 
     /// <summary>
     /// Initializes a new instance of CreateProductHandler
@@ -26,7 +25,6 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Create
     {
         _productRepository = productRepository;
         _mapper = mapper;
-        _passwordHasher = passwordHasher;
     }
 
     /// <summary>

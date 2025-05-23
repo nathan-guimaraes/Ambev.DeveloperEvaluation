@@ -1,18 +1,20 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
+﻿using Ambev.DeveloperEvaluation.Application.Products.CreateProduct;
+using Ambev.DeveloperEvaluation.Application.Products.DeleteProduct;
+using Ambev.DeveloperEvaluation.Application.Products.GetProduct;
+using Ambev.DeveloperEvaluation.Application.Products.ListCategory;
+using Ambev.DeveloperEvaluation.Application.Products.ListProduct;
+using Ambev.DeveloperEvaluation.Application.Products.ListProductCategory;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct;
-using Ambev.DeveloperEvaluation.Application.Products.CreateProduct;
-using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProduct;
-using Ambev.DeveloperEvaluation.Application.Products.GetProduct;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.DeleteProduct;
-using Ambev.DeveloperEvaluation.Application.Products.DeleteProduct;
+using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProduct;
+using Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProduct;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteProduct;
-using Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProducts;
-using Ambev.DeveloperEvaluation.Application.Products.ListProduct;
+using AutoMapper;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Product;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Products;
 
 /// <summary>
 /// Controller for managing product operations
@@ -25,11 +27,6 @@ public class ProductController : BaseController
     private readonly IMapper _mapper;
     private readonly ILogger<ProductController> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of ProductController
-    /// </summary>
-    /// <param name="mediator">The mediator instance</param>
-    /// <param name="mapper">The AutoMapper instance</param>
     public ProductController(IMediator mediator, IMapper mapper, ILogger<ProductController> logger)
     {
         _mediator = mediator;
@@ -37,12 +34,6 @@ public class ProductController : BaseController
         _logger = logger;
     }
 
-    /// <summary>
-    /// Creates a new product
-    /// </summary>
-    /// <param name="request">The product creation request</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The created product details</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponseWithData<CreateProductResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -65,12 +56,6 @@ public class ProductController : BaseController
         });
     }
 
-    /// <summary>
-    /// Retrieves a product by their ID
-    /// </summary>
-    /// <param name="id">The unique identifier of the product</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The product details if found</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiResponseWithData<GetProductResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -87,20 +72,9 @@ public class ProductController : BaseController
         var command = _mapper.Map<GetProductCommand>(request.Id);
         var response = await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponseWithData<GetProductResponse>
-        {
-            Success = true,
-            Message = "Product retrieved successfully",
-            Data = _mapper.Map<GetProductResponse>(response)
-        });
+        return Ok(_mapper.Map<GetProductResponse>(response), "Product retrieved successfully");
     }
 
-    /// <summary>
-    /// Deletes a product by their ID
-    /// </summary>
-    /// <param name="id">The unique identifier of the product to delete</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Success response if the product was deleted</returns>
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -117,11 +91,7 @@ public class ProductController : BaseController
         var command = _mapper.Map<DeleteProductCommand>(request.Id);
         await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponse
-        {
-            Success = true,
-            Message = "Product deleted successfully"
-        });
+        return Ok("Product deleted successfully");
     }
 
     [HttpGet]
@@ -130,18 +100,6 @@ public class ProductController : BaseController
     public async Task<IActionResult> GetProductsAsync([FromQuery] ListProductRequest request, CancellationToken
     cancellationToken)
     {
-        _logger.LogInformation("Controller {ProductController} triggered to handle {GetProductsRequest}",
-            nameof(ProductController));
-
-        //var validator = new GetAllProductsRequestValidator();
-        //var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        //if (!validationResult.IsValid)
-        //{
-        //    _logger.LogWarning("Validation failed for {GetProductsRequest}", nameof(GetAllProductsRequest));
-        //    return base.BadRequest(validationResult.Errors);
-        //}
-
         var command = _mapper.Map<ListProductCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
         var products = _mapper.Map<List<ListProductResponse>>(response.Products.Data);
@@ -149,7 +107,37 @@ public class ProductController : BaseController
             products,
             response.Products.TotalItems,
             response.Products.CurrentPage,
-            response.Products.PageSize);
+            response.Products.PageSize,
+            message: "Products retrieved successfully");
+
+        return OkPaginated(pagedList);
+    }
+
+    [HttpGet("categories")]
+    [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetCategoriesAsync(CancellationToken cancellationToken)
+    {
+        var command = new ListCategoryCommand();
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Ok(response, "Categories retrieved successfully");
+    }
+
+    [HttpGet("category/{category}")]
+    [ProducesResponseType(typeof(PaginatedResponse<ListProductResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetProductsByCategoryAsync([FromRoute] string category, [FromQuery] ListProductRequest request, CancellationToken cancellationToken)
+    {
+        var command = new ListProductCategoryCommand(category, request);
+        var response = await _mediator.Send(command, cancellationToken);
+        var products = _mapper.Map<List<ListProductResponse>>(response.Products.Data);
+        var pagedList = new PaginatedList<ListProductResponse>(
+            products,
+            response.Products.TotalItems,
+            response.Products.CurrentPage,
+            response.Products.PageSize,
+            message: "Products retrieved successfully");
 
         return OkPaginated(pagedList);
     }

@@ -10,6 +10,7 @@ using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using Serilog.Sinks.SystemConsole.Themes;
 using Serilog.Templates;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Ambev.DeveloperEvaluation.Common.Logging;
 
@@ -100,5 +101,21 @@ public static class LoggingExtension
         logger.LogInformation("Logging enabled for '{Application}' on '{Environment}' - Mode: {Mode}", app.Environment.ApplicationName, app.Environment.EnvironmentName, mode);
         return app;
 
+    }
+
+    public static void LogActionStart(this Microsoft.Extensions.Logging.ILogger logger, string className, [CallerMemberName] string actionName = "")
+    {
+        logger.LogInformation("Starting execution of {Action} on {Class}", actionName, className);
+    }
+
+    public static void LogActionStart(this Microsoft.Extensions.Logging.ILogger logger, object classInstance, [CallerMemberName] string actionName = "")
+    {
+        var className = classInstance.GetType().Name;
+        logger.LogInformation("Starting execution of {Action} on {Class}", actionName, className);
+    }
+
+    public static void LogActionFinished(this Microsoft.Extensions.Logging.ILogger logger, long time, string className, [CallerMemberName] string actionName = "")
+    {
+        logger.LogInformation("Finished execution of {Action} on {Class} in {ElapsedMilliseconds} ms", actionName, className, time);
     }
 }

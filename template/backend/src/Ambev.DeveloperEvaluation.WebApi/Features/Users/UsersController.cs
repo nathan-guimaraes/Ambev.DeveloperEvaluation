@@ -86,12 +86,7 @@ public class UsersController : BaseController
         var command = _mapper.Map<GetUserCommand>(request.Id);
         var response = await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponseWithData<GetUserResponse>
-        {
-            Success = true,
-            Message = "User retrieved successfully",
-            Data = _mapper.Map<GetUserResponse>(response)
-        });
+        return Ok(_mapper.Map<GetUserResponse>(response), "User retrieved successfully");
     }
 
     /// <summary>
@@ -126,21 +121,9 @@ public class UsersController : BaseController
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponse<ListUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetProductsAsync([FromQuery] ListUserRequest request, CancellationToken
+    public async Task<IActionResult> GetUsersAsync([FromQuery] ListUserRequest request, CancellationToken
     cancellationToken)
     {
-        _logger.LogInformation("Controller {UsersController} triggered to handle {GetProductsRequest}",
-            nameof(UsersController));
-
-        //var validator = new GetAllProductsRequestValidator();
-        //var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        //if (!validationResult.IsValid)
-        //{
-        //    _logger.LogWarning("Validation failed for {GetProductsRequest}", nameof(GetAllProductsRequest));
-        //    return base.BadRequest(validationResult.Errors);
-        //}
-
         var command = _mapper.Map<ListUserCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
         var users = _mapper.Map<List<ListUserResponse>>(response.Users.Data);

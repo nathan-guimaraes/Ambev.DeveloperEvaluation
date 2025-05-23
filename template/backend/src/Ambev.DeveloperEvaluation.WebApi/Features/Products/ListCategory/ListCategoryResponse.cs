@@ -1,11 +1,9 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProduct;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.ListCategory;
 
-public class GetProductResponse
+public class ListCategoryResponse
 {
-    public Guid Id { get; set; }
-
     public string Title { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string Description { get; set; } = string.Empty;

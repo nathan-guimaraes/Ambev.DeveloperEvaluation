@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProduct;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.ListCategory;
 
 /// <summary>
 /// Validator for GetProductRequest

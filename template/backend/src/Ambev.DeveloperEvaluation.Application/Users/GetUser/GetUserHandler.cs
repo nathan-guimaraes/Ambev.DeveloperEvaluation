@@ -1,7 +1,10 @@
-using AutoMapper;
-using MediatR;
-using FluentValidation;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Services;
+using AutoMapper;
+using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Users.GetUser;
 
@@ -12,6 +15,8 @@ public class GetUserHandler : IRequestHandler<GetUserCommand, GetUserResult>
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly IUserCacheService<User> _cacheService;
+    private readonly ILogger<GetUserHandler> _logger;
 
     /// <summary>
     /// Initializes a new instance of GetUserHandler
@@ -21,10 +26,14 @@ public class GetUserHandler : IRequestHandler<GetUserCommand, GetUserResult>
     /// <param name="validator">The validator for GetUserCommand</param>
     public GetUserHandler(
         IUserRepository userRepository,
-        IMapper mapper)
+        IMapper mapper,
+        IUserCacheService<User> cacheService,
+        ILogger<GetUserHandler> logger)
     {
         _userRepository = userRepository;
         _mapper = mapper;
+        _cacheService = cacheService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,9 +50,18 @@ public class GetUserHandler : IRequestHandler<GetUserCommand, GetUserResult>
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (user == null)
-            throw new KeyNotFoundException($"User with ID {request.Id} not found");
+        var cachedUser = await _cacheService.GetCacheAsync(request.Id, cancellationToken);
+
+        if (cachedUser is not null)
+        {
+            _logger.LogInformation("User with ID {Id} retrieved from cache", request.Id);
+            return _mapper.Map<GetUserResult>(cachedUser);
+        }
+
+        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Usuário com ID {request.Id} não encontrado.");
+
+        await _cacheService.SetCacheAsync(user, cancellationToken);
 
         return _mapper.Map<GetUserResult>(user);
     }

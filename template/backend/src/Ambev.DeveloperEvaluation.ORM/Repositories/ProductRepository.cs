@@ -69,14 +69,27 @@ public class ProductRepository : IProductRepository
     /// <param name="pagedOrdered"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<PaginatedResult<Product>> ListProductsAsync(PagedOrderedBase pagedOrdered, CancellationToken cancellationToken = default)
-    {
-        var query = await _context
+    public async Task<PaginatedResult<Product>> ListProductsAsync(PagedOrderedBase pagedOrdered, CancellationToken cancellationToken = default) =>
+        await _context
             .Products
             .AsNoTracking()
             .Sort(pagedOrdered._order)
-            .Paginate(pagedOrdered);
+            .Paginate(pagedOrdered, cancellationToken);
 
-        return query;
-    }
+
+    public async Task<string[]> ListCategoryAsync(CancellationToken cancellationToken = default) =>
+        await _context
+            .Products
+            .AsNoTracking()
+            .Select(x => x.Category)
+            .Distinct()
+            .ToArrayAsync(cancellationToken);
+
+    public async Task<PaginatedResult<Product>> ListProductCategoryAsync(string category, PagedOrderedBase pagedOrdered, CancellationToken cancellationToken = default) =>
+        await _context
+            .Products
+            .AsNoTracking()
+            .Where(x => EF.Functions.ILike(x.Category, category))
+            .Sort(pagedOrdered._order)
+            .Paginate(pagedOrdered, cancellationToken);
 }

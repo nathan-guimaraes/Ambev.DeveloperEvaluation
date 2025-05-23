@@ -33,4 +33,6 @@ public interface IProductRepository
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<PaginatedResult<Product>> ListProductsAsync(PagedOrderedBase pagedOrdered, CancellationToken cancellationToken = default);
+    Task<PaginatedResult<Product>> ListProductCategoryAsync(string category, PagedOrderedBase pagedOrdered, CancellationToken cancellationToken = default);
+    Task<string[]> ListCategoryAsync(CancellationToken cancellationToken = default);
 }
