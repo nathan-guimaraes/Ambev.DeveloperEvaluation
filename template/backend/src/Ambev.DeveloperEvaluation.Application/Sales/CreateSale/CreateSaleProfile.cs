@@ -14,6 +14,7 @@ public class CreateSaleProfile : Profile
     public CreateSaleProfile()
     {
         CreateMap<CreateSaleCommand, Sale>();
-        CreateMap<Sale, CreateSaleResult>();
+        CreateMap<Sale, CreateSaleResult>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
     }
 }

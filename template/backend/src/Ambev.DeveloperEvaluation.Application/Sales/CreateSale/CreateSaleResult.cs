@@ -4,5 +4,13 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 
 public class CreateSaleResult
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
+    public long Number { get; }
+    public Guid UserId { get; }
+    public DateTime SaleDate { get; }
+    public List<SaleItem> Items { get; } = [];
+    public decimal TotalSaleAmount { get; }
+    public bool IsCanceled { get; }
+    public decimal TotalSaleDiscount { get; }
+    public string Branch { get; }
 }
