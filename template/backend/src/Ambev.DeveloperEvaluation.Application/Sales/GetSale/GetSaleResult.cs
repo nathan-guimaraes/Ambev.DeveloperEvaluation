@@ -7,7 +7,7 @@ public class GetSaleResult
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public DateTime SaleDate { get; set; }
-    public List<SaleItem> SaleItems { get; set; } = [];
+    public List<SaleItem> Items { get; set; } = [];
     public decimal TotalSaleAmount { get; set; } = 0;
     public bool IsCanceled { get; set; } = false;
     public decimal TotalSaleDiscount { get; set; } = 0;

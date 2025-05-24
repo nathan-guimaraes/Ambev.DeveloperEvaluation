@@ -20,8 +20,8 @@ public class ListSaleHandler : IRequestHandler<ListSaleCommand, ListSaleResult>
 
     public async Task<ListSaleResult> Handle(ListSaleCommand request, CancellationToken cancellationToken)
     {
-        var products = await _userRepository.ListSalesAsync(request, cancellationToken);
-
-        return _mapper.Map<ListSaleResult>(products);
+        var sales = await _userRepository.ListSalesAsync(request, cancellationToken);
+        var mapped = _mapper.Map<ListSaleResult>(sales);
+        return mapped;
     }
 }
