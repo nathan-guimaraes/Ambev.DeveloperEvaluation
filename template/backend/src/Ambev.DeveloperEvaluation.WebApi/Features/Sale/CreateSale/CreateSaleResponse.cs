@@ -1,11 +1,8 @@
-﻿using Ambev.DeveloperEvaluation.Domain.ValueObjects;
+using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 
-/// <summary>
-/// Represents a request to create a new user in the system.
-/// </summary>
-public class CreateProductRequest
+public class CreateSaleResponse
 {
     public string Title { get; set; } = string.Empty;
     public decimal Price { get; set; }

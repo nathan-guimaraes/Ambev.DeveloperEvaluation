@@ -11,5 +11,6 @@ public class ServicesModuleInitializer : IModuleInitializer
     {
         builder.Services.AddScoped<IUserCacheService<User>, UserCacheService>();
         builder.Services.AddScoped<IProductCacheService<Product>, ProductCacheService>();
+        builder.Services.AddScoped<ISaleCacheService<Sale>, SaleCacheService>();
     }
 }
